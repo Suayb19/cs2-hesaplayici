@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS2 Envanter Değer Hesaplayıcı</title>
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --card-color: #16213e;
+            --accent-color: #e94560;
+            --text-color: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: var(--card-color);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--accent-color);
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 80%;
+            padding: 12px;
+            border: 2px solid #0f3460;
+            border-radius: 8px;
+            background: #0f3460;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            text-align: center;
+        }
+
+        input:focus {
+            border-color: var(--accent-color);
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        .result-box {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #0f3460;
+            display: none;
+        }
+
+        .total-price {
+            font-size: 28px;
+            color: #4e9f3d;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .item-list {
+            text-align: left;
+            margin-top: 15px;
+            font-size: 14px;
+            border-top: 1px solid #16213e;
+            padding-top: 10px;
+        }
+
+        .ad-space {
+            margin-top: 30px;
+            padding: 15px;
+            background: #252525;
+            border: 1px dashed #666;
+            color: #888;
+            font-size: 12px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>CS2 Inventory Calculator</h1>
+    <p>Steam ID veya Kullanıcı Adınızı yazarak envanter değerini hesaplayın (Demo sürümüdür).</p>
+    
+    <div class="input-group">
+        <input type="text" id="steamInput" placeholder="Örn: SteamID64 veya Kullanıcı Adı">
+    </div>
+    
+    <button onclick="hesaplaEnvanter()">Envanteri Hesapla</button>
+
+    <div class="result-box" id="resultBox">
+        <h3>Hesaplama Başarılı!</h3>
+        <p>Bulunan Skin Sayısı: <span id="skinCount">0</span></p>
+        <div class="total-price" id="totalPrice">$0.00</div>
+        
+        <div class="item-list" id="itemList">
+            </div>
+    </div>
+
+    <div class="ad-space">
+        REKLAM ALANI (Google AdSense)
+    </div>
+</div>
+
+<script>
+// Gelecekte API'den çekeceğimiz fiyatların simülasyonu (Veri tabanı mantığı)
+const sahteVeritabiFiyatlari = {
+    "M4A1-S | Printstream (Field-Tested)": 65.50,
+    "AK-47 | Redline (Field-Tested)": 18.20,
+    "AWP | Asiimov (Well-Wearied)": 85.00,
+    "Glove Case": 4.10
+};
+
+// Bir kullanıcının envanterinde var olduğunu varsaydığımız sahte eşyalar
+const sahteKullaniciEnvanteri = [
+    "M4A1-S | Printstream (Field-Tested)",
+    "AK-47 | Redline (Field-Tested)",
+    "Glove Case",
+    "Glove Case" // 2 tane kasası olsun
+];
+
+function hesaplaEnvanter() {
+    const inputVal = document.getElementById("steamInput").value.trim();
+    
+    if(inputVal === "") {
+        alert("Lütfen geçerli bir Steam adı girin!");
+        return;
+    }
+
+    let toplamDeger = 0;
+    let itemListHTML = "<strong>Bulunan Eşyalar:</strong><br>";
+
+    // Envanterdeki her eşyanın fiyatını sahte veri tabanımızdan eşleştiriyoruz
+    sahteKullaniciEnvanteri.forEach(item => {
+        const fiyat = sahteVeritabiFiyatlari[item] || 0;
+        toplamDeger += fiyat;
+        itemListHTML += `• ${item} - <strong>$${fiyat.toFixed(2)}</strong><br>`;
+    });
+
+    // Arayüzü güncelleme
+    document.getElementById("skinCount").innerText = sahteKullaniciEnvanteri.length;
+    document.getElementById("total
