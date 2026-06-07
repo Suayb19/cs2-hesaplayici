@@ -136,40 +136,65 @@
 </div>
 
 <script>
-// Gelecekte API'den çekeceğimiz fiyatların simülasyonu (Veri tabanı mantığı)
-const sahteVeritabiFiyatlari = {
-    "M4A1-S | Printstream (Field-Tested)": 65.50,
-    "AK-47 | Redline (Field-Tested)": 18.20,
-    "AWP | Asiimov (Well-Wearied)": 85.00,
-    "Glove Case": 4.10
-};
+// Gerçek dünyada fiyatları anlık çekeceğimiz global değişken
+let guncelCs2Fiyatlari = {};
 
-// Bir kullanıcının envanterinde var olduğunu varsaydığımız sahte eşyalar
-const sahteKullaniciEnvanteri = [
-    "M4A1-S | Printstream (Field-Tested)",
-    "AK-47 | Redline (Field-Tested)",
-    "Glove Case",
-    "Glove Case" // 2 tane kasası olsun
-];
+// Site açılır açılmaz arka planda fiyatları API'den çeken fonksiyon
+async function fiyatlariYukle() {
+    try {
+        // Ücretsiz ve herkese açık örnek bir CS2 fiyat API'si (Temsili URL)
+        // Gerçek projede: https://bum.com/api/v1/prices veya steamwebapi gibi bir servis kullanılır
+        const response = await fetch('https://raw.githubusercontent.com/bybaf/CS2-API/main/prices.json'); 
+        guncelCs2Fiyatlari = await response.json();
+        console.log("CS2 Fiyatları başarıyla güncellendi!");
+    } catch (error) {
+        console.error("Fiyatlar çekilirken hata oluştu:", error);
+        // Eğer API çökerse yedek fiyatları devreye sokalım
+        guncelCs2Fiyatlari = {
+            "AK-47 | Redline (Field-Tested)": 22.50,
+            "M4A1-S | Printstream (Field-Tested)": 68.00
+        };
+    }
+}
 
-function hesaplaEnvanter() {
-    const inputVal = document.getElementById("steamInput").value.trim();
+// Sayfa yüklenir yüklenir yüklenmez fiyatları çekmeye başla
+window.onload = fiyatlariYukle;
+
+// Kullanıcı butona bastığında çalışacak gerçek hesaplama fonksiyonu
+async function hesaplaEnvanter() {
+    const steamInput = document.getElementById("steamInput").value.trim();
     
-    if(inputVal === "") {
-        alert("Lütfen geçerli bir Steam adı girin!");
+    if(steamInput === "") {
+        alert("Lütfen bir Steam ID veya kullanıcı adı girin!");
         return;
     }
 
-    let toplamDeger = 0;
-    let itemListHTML = "<strong>Bulunan Eşyalar:</strong><br>";
+    // 1. ADIM: Kullanıcının envanterini Steam API'sinden çekiyoruz (Temsili mantık)
+    // Gerçekte Steam gizlilik ayarlarına göre tarayıcıdan direkt çekmeye izin vermeyebilir, 
+    // bu yüzden bir proxy veya üçüncü parti aracı kullanacağız.
+    
+    // Şimdilik kullanıcının envanterinde bu iki itemin olduğunu varsayalım:
+    const kullaniciSkins = [
+        "AK-47 | Redline (Field-Tested)",
+        "M4A1-S | Printstream (Field-Tested)"
+    ];
 
-    // Envanterdeki her eşyanın fiyatını sahte veri tabanımızdan eşleştiriyoruz
-    sahteKullaniciEnvanteri.forEach(item => {
-        const fiyat = sahteVeritabiFiyatlari[item] || 0;
+    let toplamDeger = 0;
+    let itemListHTML = "<strong>Envanterinizdeki Eşyalar:</strong><br>";
+
+    // 2. ADIM: Çektiğimiz envanterdeki itemleri, API'den gelen fiyatlarla eşleştiriyoruz
+    kullaniciSkins.forEach(item => {
+        // API'den gelen fiyatı al, yoksa 0 kabul et
+        const fiyat = guncelCs2Fiyatlari[item] || 0; 
         toplamDeger += fiyat;
         itemListHTML += `• ${item} - <strong>$${fiyat.toFixed(2)}</strong><br>`;
     });
 
-    // Arayüzü güncelleme
-    document.getElementById("skinCount").innerText = sahteKullaniciEnvanteri.length;
-    document.getElementById("total
+    // 3. ADIM: Sonuçları ekrana yazdırma
+    document.getElementById("skinCount").innerText = kullaniciSkins.length;
+    document.getElementById("totalPrice").innerText = `$${toplamDeger.toFixed(2)}`;
+    document.getElementById("itemList").innerHTML = itemListHTML;
+    
+    document.getElementById("resultBox").style.display = "block";
+}
+</script>
